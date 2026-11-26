@@ -1,0 +1,146 @@
+{
+  "_comment": "Ticker universe for the EOD desk. Add an instrument to a group, then run scripts/fetch_markets.py or the Refresh market data workflow. Yahoo tickers go in symbol. Yields use source=treasury plus the Treasury column name in field, with a FRED series in fred as fallback. See README.",
+  "anchor": "SPY",
+  "groups": [
+    {
+      "id": "us",
+      "label": "US EQUITIES",
+      "column": 1,
+      "session": "us_cash",
+      "instruments": [
+        { "id": "SPY", "name": "S&P 500", "symbol": "SPY" },
+        { "id": "QQQ", "name": "Nasdaq 100", "symbol": "QQQ" },
+        { "id": "IWM", "name": "Russell 2000", "symbol": "IWM" },
+        { "id": "DIA", "name": "Dow", "symbol": "DIA" },
+        { "id": "RSP", "name": "S&P Eq Wt", "symbol": "RSP" },
+        { "id": "VIX", "name": "VIX", "symbol": "^VIX" }
+      ]
+    },
+    {
+      "id": "sectors",
+      "label": "SECTORS",
+      "column": 1,
+      "session": "us_cash",
+      "instruments": [
+        { "id": "XLK", "name": "Tech", "symbol": "XLK" },
+        { "id": "XLF", "name": "Financials", "symbol": "XLF" },
+        { "id": "XLE", "name": "Energy", "symbol": "XLE" },
+        { "id": "XLV", "name": "Health Care", "symbol": "XLV" },
+        { "id": "XLI", "name": "Industrials", "symbol": "XLI" },
+        { "id": "XLY", "name": "Cons Disc", "symbol": "XLY" },
+        { "id": "XLP", "name": "Staples", "symbol": "XLP" },
+        { "id": "XLU", "name": "Utilities", "symbol": "XLU" },
+        { "id": "XLB", "name": "Materials", "symbol": "XLB" },
+        { "id": "XLRE", "name": "Real Estate", "symbol": "XLRE" },
+        { "id": "XLC", "name": "Comm Svcs", "symbol": "XLC" },
+        { "id": "SMH", "name": "Semis", "symbol": "SMH" }
+      ]
+    },
+    {
+      "id": "global",
+      "label": "GLOBAL",
+      "column": 1,
+      "session": "us_cash",
+      "instruments": [
+        { "id": "EFA", "name": "EAFE", "symbol": "EFA" },
+        { "id": "EEM", "name": "EM", "symbol": "EEM" },
+        { "id": "FXI", "name": "China", "symbol": "FXI" },
+        { "id": "EWJ", "name": "Japan", "symbol": "EWJ" },
+        { "id": "EWG", "name": "Germany", "symbol": "EWG" },
+        { "id": "INDA", "name": "India", "symbol": "INDA" }
+      ]
+    },
+    {
+      "id": "rates",
+      "label": "RATES / CREDIT",
+      "column": 2,
+      "session": "us_cash",
+      "note": "YIELDS Δ bp",
+      "instruments": [
+        {
+          "id": "US2Y",
+          "name": "US 2Y",
+          "kind": "yield",
+          "source": "treasury",
+          "field": "2 Yr",
+          "fred": "DGS2",
+          "session": "yield"
+        },
+        {
+          "id": "US10Y",
+          "name": "US 10Y",
+          "kind": "yield",
+          "source": "treasury",
+          "field": "10 Yr",
+          "fred": "DGS10",
+          "session": "yield"
+        },
+        {
+          "id": "US30Y",
+          "name": "US 30Y",
+          "kind": "yield",
+          "source": "treasury",
+          "field": "30 Yr",
+          "fred": "DGS30",
+          "session": "yield"
+        },
+        { "id": "TLT", "name": "20Y+ UST", "symbol": "TLT" },
+        { "id": "IEF", "name": "7-10Y UST", "symbol": "IEF" },
+        { "id": "SHY", "name": "1-3Y UST", "symbol": "SHY" },
+        { "id": "HYG", "name": "HY Credit", "symbol": "HYG" },
+        { "id": "LQD", "name": "IG Credit", "symbol": "LQD" }
+      ]
+    },
+    {
+      "id": "fx",
+      "label": "FX",
+      "column": 2,
+      "session": "fx",
+      "instruments": [
+        { "id": "DXY", "name": "Dollar", "symbol": "DX-Y.NYB", "decimals": 2 },
+        { "id": "EURUSD", "name": "EUR/USD", "symbol": "EURUSD=X", "decimals": 4 },
+        { "id": "USDJPY", "name": "USD/JPY", "symbol": "USDJPY=X", "decimals": 2 },
+        { "id": "AUDUSD", "name": "AUD/USD", "symbol": "AUDUSD=X", "decimals": 4 },
+        { "id": "GBPUSD", "name": "GBP/USD", "symbol": "GBPUSD=X", "decimals": 4 },
+        {
+          "id": "USDCNH",
+          "name": "USD/CNH",
+          "source": "currency-api",
+          "base": "usd",
+          "quote": "cnh",
+          "fallbackSymbol": "CNH=F",
+          "decimals": 4,
+          "session": "fx"
+        }
+      ]
+    },
+    {
+      "id": "commodities",
+      "label": "COMMODITIES",
+      "column": 2,
+      "session": "futures",
+      "note": "FRONT MONTH",
+      "instruments": [
+        { "id": "GC", "name": "Gold", "symbol": "GC=F", "decimals": 1 },
+        { "id": "SI", "name": "Silver", "symbol": "SI=F", "decimals": 2 },
+        { "id": "CL", "name": "WTI", "symbol": "CL=F", "decimals": 2 },
+        { "id": "BZ", "name": "Brent", "symbol": "BZ=F", "decimals": 2 },
+        { "id": "NG", "name": "Nat Gas", "symbol": "NG=F", "decimals": 3 },
+        { "id": "HG", "name": "Copper", "symbol": "HG=F", "decimals": 4 }
+      ]
+    },
+    {
+      "id": "crypto",
+      "label": "CRYPTO",
+      "column": 2,
+      "session": "spot",
+      "instruments": [
+        { "id": "BTC", "name": "Bitcoin", "symbol": "BTC-USD", "decimals": 0, "coingecko": "bitcoin" },
+        { "id": "ETH", "name": "Ethereum", "symbol": "ETH-USD", "decimals": 1, "coingecko": "ethereum" },
+        { "id": "SOL", "name": "Solana", "symbol": "SOL-USD", "decimals": 2, "coingecko": "solana" },
+        { "id": "IBIT", "name": "Bitcoin ETF", "symbol": "IBIT", "decimals": 2, "session": "us_cash" },
+        { "id": "ETHA", "name": "Ether ETF", "symbol": "ETHA", "decimals": 2, "session": "us_cash" }
+      ]
+    }
+  ]
+}

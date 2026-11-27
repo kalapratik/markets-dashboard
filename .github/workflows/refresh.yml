@@ -7,9 +7,6 @@ on:
     - cron: "30 22 * * 1-5"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 concurrency:
   group: refresh-markets
   cancel-in-progress: false
@@ -18,6 +15,10 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,14 +30,29 @@ jobs:
         run: python3 scripts/fetch_markets.py
 
       - name: Commit snapshot
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data/markets.json
           if git diff --staged --quiet; then
             echo "No change in snapshot"
-            exit 0
+          else
+            asof=$(python3 -c "import json; print(json.load(open('site/data/markets.json'))['asOf'])")
+            git commit -m "data: EOD snapshot ${asof}"
+            git push
           fi
-          asof=$(python3 -c "import json; print(json.load(open('site/data/markets.json'))['asOf'])")
-          git commit -m "data: EOD snapshot ${asof}"
-          git push
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  # A push made with this workflow's GITHUB_TOKEN does not start other workflows,
+  # so Deploy GitHub Pages would never see the data commit. Publish that commit here.
+  deploy:
+    needs: refresh
+    if: ${{ github.ref == 'refs/heads/main' && needs.refresh.result == 'success' }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      ref: ${{ needs.refresh.outputs.sha }}

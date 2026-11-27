@@ -20,7 +20,7 @@ To refresh immediately: **Actions → Refresh market data → Run workflow** (br
 
 ## Schedule
 
-`Refresh market data` runs weekdays at 22:30 UTC (5:30pm ET in winter, 6:30pm ET in summer), plus any manual run. It fetches, and commits only when the JSON changed. That push triggers `Deploy GitHub Pages`.
+`Refresh market data` runs weekdays at 22:30 UTC (5:30pm ET in winter, 6:30pm ET in summer), plus any manual run. It fetches, commits when the JSON changed, then deploys that commit to Pages. A push from the workflow token does not start the `push` trigger on `Deploy GitHub Pages`, so the refresh workflow calls the deploy itself. A normal push to `main` still starts `Deploy GitHub Pages` on its own.
 
 If Yahoo or Treasury is down and fewer than 60% of the names succeed, the script exits without touching the file, so the site keeps the last good snapshot. Re-run the workflow later. Names that failed on a successful run show in the page footer.
 

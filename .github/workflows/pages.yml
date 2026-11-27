@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to publish. The refresh workflow passes the snapshot it just pushed.
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -22,6 +28,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A GITHUB_TOKEN push does not start this workflow's push trigger, so the
+          # refresh caller hands over the new commit. Push and manual runs use their own SHA.
+          ref: ${{ inputs.ref || github.sha }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

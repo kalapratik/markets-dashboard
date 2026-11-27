@@ -24,6 +24,8 @@ To refresh immediately: **Actions → Refresh market data → Run workflow** (br
 
 If Yahoo or Treasury is down and fewer than 60% of the names succeed, the script exits without touching the file, so the site keeps the last good snapshot. Re-run the workflow later. Names that failed on a successful run show in the page footer.
 
+The same run writes `site/data/credit.json` for the AI / neocloud credit box. A credit source failing does not fail the equity snapshot, and a credit run that prices nothing leaves the previous credit file in place. Basisline bond-implied 5Y CDS needs no key. Atlantis z-spreads, prices, and YTM use the free tier at 100 calls/hour per IP with no key. If that IP cap is hit, put a free Atlantis key in the repo secret `ATLANTIS_API_KEY` (Atlantis Data Solutions, [atlantisdatasolutions.com/api](https://atlantisdatasolutions.com/api), header `X-API-Key`). Without it, a failed bond row shows `—`, or the last stored print if one exists. The box has to say `Bond data: Atlantis`.
+
 ## Add a ticker
 
 Edit [`universe.json`](universe.json). Each group has an `instruments` list. Order in the file is the row order. `column` is `1` (left) or `2` (right).

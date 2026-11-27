@@ -638,17 +638,27 @@ def self_test() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fetch EOD market data into site/data/markets.json")
     parser.add_argument("--self-test", action="store_true", help="run offline metric checks and exit")
+    parser.add_argument("--credit-only", action="store_true", help="refresh site/data/credit.json and leave markets.json")
     args = parser.parse_args()
     if args.self_test:
         self_test()
         return
     cfg = load_universe()
+    if args.credit_only:
+        from fetch_credit import refresh_credit
+        refresh_credit(cfg)
+        return
     payload = build(cfg)
     write_output(payload)
     print(
         f"wrote {OUTPUT.relative_to(ROOT)} asOf={payload['asOf']} "
         f"ok={payload['okCount']} fail={len(payload['failures'])}"
     )
+    try:
+        from fetch_credit import refresh_credit
+        refresh_credit(cfg)
+    except Exception as exc:  # noqa: BLE001 - credit must not fail the equity snapshot
+        print(f"credit refresh failed, left the last credit file: {exc}", file=sys.stderr)
 
 
 if __name__ == "__main__":

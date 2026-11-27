@@ -142,5 +142,32 @@
         { "id": "ETHA", "name": "Ether ETF", "symbol": "ETHA", "decimals": 2, "session": "us_cash" }
       ]
     }
+  ],
+  "credit": [
+    { "id": "ORCL", "name": "Oracle", "source": "basisline", "slug": "orcl", "metric": "Bond-implied 5Y CDS" },
+    { "id": "META", "name": "Meta", "source": "basisline", "slug": "meta", "metric": "Bond-implied 5Y CDS" },
+    { "id": "GOOGL", "name": "Alphabet", "source": "basisline", "slug": "googl", "metric": "Bond-implied 5Y CDS" },
+    { "id": "AMZN", "name": "Amazon", "source": "basisline", "slug": "amzn", "metric": "Bond-implied 5Y CDS" },
+    { "id": "MSFT", "name": "Microsoft", "source": "basisline", "slug": "msft", "metric": "Bond-implied 5Y CDS" },
+    {
+      "id": "CRWV",
+      "name": "CoreWeave",
+      "source": "atlantis",
+      "cusip": "21873SAB4",
+      "coupon": "9.25%",
+      "maturity": "'30",
+      "fallbacks": [
+        { "cusip": "21873SAC2", "coupon": "9.00%", "maturity": "'31" },
+        { "cusip": "21873SAG3", "coupon": "9.75%", "maturity": "'31" }
+      ]
+    },
+    {
+      "id": "SBG",
+      "name": "SoftBank Group",
+      "source": "atlantis",
+      "cusip": "J7600PAB9",
+      "coupon": "9.25%",
+      "maturity": "'32"
+    }
   ]
 }

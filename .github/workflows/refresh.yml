@@ -1,0 +1,42 @@
+name: Refresh market data
+
+on:
+  schedule:
+    # 22:30 UTC weekdays. That is 5:30pm ET in winter and 6:30pm ET in summer,
+    # after the US cash close, so Yahoo has the session print.
+    - cron: "30 22 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-markets
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch EOD snapshot
+        run: python3 scripts/fetch_markets.py
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/markets.json
+          if git diff --staged --quiet; then
+            echo "No change in snapshot"
+            exit 0
+          fi
+          asof=$(python3 -c "import json; print(json.load(open('site/data/markets.json'))['asOf'])")
+          git commit -m "data: EOD snapshot ${asof}"
+          git push

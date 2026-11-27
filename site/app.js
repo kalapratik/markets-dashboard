@@ -242,6 +242,89 @@ function renderGrid(data) {
   grid.append(...columns.filter((col) => col.childElementCount));
 }
 
+function fmtBpLevel(value) {
+  if (value == null || Number.isNaN(value)) return "—";
+  return value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function fmtBpChg(value) {
+  if (value == null || Number.isNaN(value)) return { text: "—", cls: "flat" };
+  if (Math.abs(value) < 0.05) return { text: "0.0", cls: "flat" };
+  const sign = value > 0 ? "+" : "";
+  return { text: `${sign}${value.toFixed(1)}`, cls: value > 0 ? "up" : "down" };
+}
+
+function fmtPxYtm(row) {
+  if (row.price == null && row.ytm == null) return "—";
+  const price = row.price == null ? "—" : fmtLast(row.price, 2);
+  const ytm = row.ytm == null ? "—" : `${fmtLast(row.ytm, 1)}%`;
+  return `${price} / ${ytm}`;
+}
+
+function renderCredit(credit, asOf) {
+  const host = document.getElementById("credit");
+  if (!credit || !credit.rows || !credit.rows.length) {
+    host.hidden = true;
+    return;
+  }
+  host.hidden = false;
+  host.className = "panel";
+  host.replaceChildren();
+  const title = el("h2", null, credit.title || "AI / NEOCLOUD CREDIT");
+  title.append(el("span", "note", "bp"));
+  const scroller = el("div", "scroller");
+  const table = document.createElement("table");
+  const head = document.createElement("thead");
+  const hr = document.createElement("tr");
+  for (const [label, className] of [
+    ["NAME", null],
+    ["METRIC", "metric"],
+    ["LEVEL", null],
+    ["1D", null],
+    ["3M", null],
+    ["PX / YTM", null],
+  ]) {
+    hr.append(el("th", className, label));
+  }
+  head.append(hr);
+  const body = document.createElement("tbody");
+  for (const row of credit.rows) {
+    const tr = document.createElement("tr");
+    const name = el("td", "name");
+    name.append(el("span", "sym", row.id));
+    name.append(el("span", "lbl", row.name));
+    if (row.flag) name.append(el("span", "tag", row.flag));
+    const bench = asOf || credit.asOf;
+    if (row.levelDate && bench && row.levelDate !== bench) {
+      const stale = el("span", "stale", fmtDate(row.levelDate).slice(0, 6));
+      stale.title = `Last print ${fmtDate(row.levelDate)}`;
+      name.append(stale);
+    }
+    name.title = [row.name, row.cusip, row.source, row.levelDate].filter(Boolean).join(" · ");
+    tr.append(name);
+    const metric = el("td", "metric", row.metric || "—");
+    if (row.gSpread != null) {
+      metric.append(el("span", "gline", `G-spread ${fmtBpLevel(row.gSpread)}`));
+    }
+    tr.append(metric);
+    const move = fmtBpChg(row.d1);
+    tr.append(el("td", null, fmtBpLevel(row.level)));
+    tr.append(el("td", move.cls, move.text));
+    tr.append(sparkCell(row.spark));
+    tr.append(el("td", null, fmtPxYtm(row)));
+    body.append(tr);
+  }
+  table.append(head, body);
+  scroller.append(table);
+  const caveat = el("p", "caveat");
+  const bits = [credit.caveat, credit.attribution].filter(Boolean);
+  if (credit.failures && credit.failures.length) {
+    bits.push(credit.failures.map((item) => `${item.id} ${item.error}`).join(" · "));
+  }
+  caveat.textContent = bits.join(" · ");
+  host.append(title, scroller, caveat);
+}
+
 function renderFooter(data) {
   const foot = document.getElementById("foot");
   foot.replaceChildren();
@@ -267,13 +350,23 @@ function renderStatus(message) {
 async function main() {
   renderStatus("LOADING");
   try {
-    const response = await fetch("data/markets.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    const [marketsResult, creditResult] = await Promise.allSettled([
+      fetch("data/markets.json", { cache: "no-store" }),
+      fetch("data/credit.json", { cache: "no-store" }),
+    ]);
+    if (marketsResult.status !== "fulfilled" || !marketsResult.value.ok) {
+      throw new Error(marketsResult.status === "fulfilled" ? `HTTP ${marketsResult.value.status}` : marketsResult.reason.message);
+    }
+    const data = await marketsResult.value.json();
     if (!data.groups || !data.groups.length) throw new Error("snapshot has no rows");
+    let credit = null;
+    if (creditResult.status === "fulfilled" && creditResult.value.ok) {
+      credit = await creditResult.value.json();
+    }
     renderHeader(data);
     renderStrip(data);
     renderGrid(data);
+    renderCredit(credit, data.asOf);
     renderFooter(data);
   } catch (err) {
     document.getElementById("top").replaceChildren(el("h1", "brand", "MARKETS"));

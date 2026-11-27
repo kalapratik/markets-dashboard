@@ -280,6 +280,32 @@ td.name { width: 32%; }
   letter-spacing: 0.08em;
 }
 
+#credit {
+  margin: 0 10px 10px;
+}
+
+#credit table { min-width: 820px; }
+
+#credit th.metric,
+#credit td.metric { text-align: left; }
+
+#credit td.metric { color: var(--muted); }
+
+#credit .gline {
+  display: block;
+  color: var(--faint);
+  font-size: 10px;
+}
+
+#credit .caveat {
+  margin: 0;
+  padding: 5px 8px 6px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
 footer {
   padding: 4px 12px 12px;
   color: var(--faint);
